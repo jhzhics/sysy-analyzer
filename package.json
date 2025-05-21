@@ -1,10 +1,10 @@
 {
-  "name": "REPLACE_ME",
-  "description": "REPLACE_ME",
-  "author": "REPLACE_ME",
+  "name": "sysy-analyzer",
+  "description": "Analyzer for SysY language",
+  "author": "jhzhics",
   "license": "MIT",
   "version": "1.0.0",
-  "publisher": "REPLACE_ME",
+  "publisher": "jhzhics",
   "categories": [],
   "engines": {
     "vscode": "^1.75.0"

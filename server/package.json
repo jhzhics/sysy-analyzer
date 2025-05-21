@@ -1,15 +1,15 @@
 {
-  "name": "REPLACE_ME",
-  "description": "REPLACE_ME",
+  "name": "sysy-analyzer",
+  "description": "Analyzer for SysY language",
   "version": "1.0.0",
-  "author": "REPLACE_ME",
+  "author": "jhzhics",
   "license": "MIT",
   "engines": {
     "node": "*"
   },
   "repository": {
     "type": "git",
-    "url": "REPLACE_ME"
+    "url": "https://github.com/semanticart/minimum-viable-vscode-language-server-extension.gitE"
   },
   "dependencies": {
     "vscode-languageserver": "^8.1.0",
