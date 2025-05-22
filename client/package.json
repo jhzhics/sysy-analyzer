@@ -1,6 +1,7 @@
 {
   "name": "sysy-analyzer",
-  "description": "Analyzer for SysY language",
+  "displayName": "SySy Language Analyzer",
+  "description": "Language support and analysis for the SySy programming language.",
   "author": "jhzhics",
   "license": "MIT",
   "version": "0.0.1",
@@ -12,10 +13,46 @@
   "engines": {
     "vscode": "^1.75.0"
   },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters",
+    "Debuggers"
+  ],
+  "activationEvents": [
+    "onLanguage:sysy",
+    "onFileSystem:**/sysy-analyzer-server"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "sysy",
+        "aliases": ["SySy", "sysy"],
+        "extensions": [".sy"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sysy",
+        "scopeName": "source.sysy",
+        "path": "./syntaxes/sysy.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
   "dependencies": {
     "vscode-languageclient": "^8.1.0"
   },
   "devDependencies": {
-    "@types/vscode": "^1.81.0"
+    "@types/vscode": "^1.81.0",
+    "typescript": "^5.1.6"
   }
 }

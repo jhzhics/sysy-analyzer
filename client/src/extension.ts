@@ -12,7 +12,7 @@ let client: LanguageClient;
 export function activate(context: ExtensionContext) {
   // The server is implemented in Rust
   const serverPath = context.asAbsolutePath(
-    path.join("server", "target", "release", "sysy-analyzer-server")
+    path.join("server", "target", "debug", "sysy-analyzer-server")
   );
 
   // Show message when activating
@@ -24,7 +24,7 @@ export function activate(context: ExtensionContext) {
     run: { command: serverPath, args: [] },
     debug: {
       command: serverPath,
-      args: ["--debug"]
+      args: []
     },
   };
 

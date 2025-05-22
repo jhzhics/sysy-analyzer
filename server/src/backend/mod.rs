@@ -7,9 +7,18 @@ pub struct Backend {
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
+    async fn initialize(&self, _params: InitializeParams) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
+        let mut capabilities = ServerCapabilities::default();
 
-        let capabilities = ServerCapabilities::default();
+        capabilities.text_document_sync = Some(TextDocumentSyncCapability::Options(
+            TextDocumentSyncOptions {
+                open_close: Some(true),
+                change: Some(TextDocumentSyncKind::INCREMENTAL),
+                ..Default::default()
+            }
+        ));
+
+        capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
 
         let initialize_result = InitializeResult {
             capabilities,
@@ -23,8 +32,31 @@ impl LanguageServer for Backend {
         Ok(initialize_result)
     }
 
+    async fn did_open(&self, params: DidOpenTextDocumentParams) -> () {
+        self.client.log_message(MessageType::LOG, format!("Opened src file: {}", params.text_document.uri)).await;
+    }
+
+    async fn did_change(&self, params: DidChangeTextDocumentParams) {
+        self.client.log_message(MessageType::LOG, format!("Changed src file: {}", params.text_document.uri)).await;
+        // You would typically process the changes here
+    }
+
+    async fn did_close(&self, params: DidCloseTextDocumentParams) {
+        self.client.log_message(MessageType::LOG, format!("Closed src file: {}", params.text_document.uri)).await;
+    }
+
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
-        self.client.log_message(MessageType::INFO, "Server shutting down".to_string()).await;
+        self.client.log_message(MessageType::LOG, "Server shutting down".to_string()).await;
         Ok(())
+    }
+
+    // Add other handlers as needed (e.g., hover, completion, etc.)
+    async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
+        self.client.log_message(MessageType::LOG, format!("Hover request at position: {:?}", params.text_document_position_params.position)).await;
+        // Return a dummy hover for now
+        Ok(Some(Hover {
+            contents: HoverContents::Scalar(MarkedString::String("This is a hover! ✨".to_string())),
+            range: None,
+        }))
     }
 }

@@ -27,8 +27,8 @@
     },
     {
       "type": "shell",
-      "command": "cd server && cargo build --release",
-      "label": "cargo build release",
+      "command": "cd server && cargo build",
+      "label": "cargo build",
       "group": "build",
       "presentation": {
         "reveal": "always",
@@ -38,7 +38,7 @@
     },
     {
       "label": "build all",
-      "dependsOn": ["cargo build release", "npm: compile"],
+      "dependsOn": ["cargo build", "npm: compile"],
       "dependsOrder": "sequence",
       "group": {
         "kind": "build",

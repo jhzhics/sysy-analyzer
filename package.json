@@ -10,17 +10,23 @@
     "vscode": "^1.75.0"
   },
   "activationEvents": [
-    "onLanguage"
+    "onLanguage:sysy"
   ],
-  "main": "./client/out/extension",
   "contributes": {
-    "configuration": {}
+    "languages": [
+      {
+        "id": "sysy",
+        "aliases": ["Sysy", "sysy"],
+        "extensions": [".sy"]
+      }
+    ]
   },
+  "main": "./client/out/extension",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+    "postinstall": "cd client && npm install && cd .."
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
