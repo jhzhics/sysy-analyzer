@@ -24,6 +24,27 @@
         "reveal": "never"
       },
       "problemMatcher": ["$tsc-watch"]
+    },
+    {
+      "type": "shell",
+      "command": "cd server && cargo build --release",
+      "label": "cargo build release",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "build all",
+      "dependsOn": ["cargo build release", "npm: compile"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
     }
   ]
 }
