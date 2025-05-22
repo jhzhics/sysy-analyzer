@@ -12,7 +12,5 @@
     "url": "https://github.com/semanticart/minimum-viable-vscode-language-server-extension.gitE"
   },
   "dependencies": {
-    "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.8"
   }
 }
