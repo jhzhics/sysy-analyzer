@@ -1,1 +1,8 @@
 # A Sysy Analyzer
+
+# Dependency
+## Tree-sitter
+- Install tree-sitter CLI
+
+# Usage
+Run vscode launch task `Launch Client`
