@@ -27,6 +27,16 @@
     },
     {
       "type": "shell",
+      "command": "cd server/tree-sitter-sysy-parser && tree-sitter generate",
+      "label": "tree-sitter generate",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "type": "shell",
       "command": "cd server && cargo build",
       "label": "cargo build",
       "group": "build",
@@ -36,15 +46,16 @@
       },
       "problemMatcher": ["$rustc"]
     },
+
     {
       "label": "build all",
-      "dependsOn": ["cargo build", "npm: compile"],
+      "dependsOn": ["tree-sitter generate", "cargo build", "npm: compile"],
       "dependsOrder": "sequence",
       "group": {
         "kind": "build",
         "isDefault": false
       },
       "problemMatcher": []
-    }
+    },
   ]
 }
