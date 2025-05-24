@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "sysy_parser",
+      "camelcase": "SysyParser",
+      "title": "SysyParser",
+      "scope": "source.sysy_parser",
+      "file-types": [
+        "sy"
+      ],
+      "injection-regex": "^sysy_parser$",
+      "class-name": "TreeSitterSysyParser"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "A simple parser for sysy language",
+    "authors": [
+      {
+        "name": "jhzhics",
+        "email": "zhangjiahao2022@stu.pku.edu.cn",
+        "url": "https://jhzhics.github.io/"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/jhzhics/sysy-analyzer.git"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
