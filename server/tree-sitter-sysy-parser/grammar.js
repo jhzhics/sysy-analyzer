@@ -170,15 +170,17 @@ module.exports = grammar({
       $.Exp,
       repeat(seq(",", $.Exp))
     ),
+
+    FuncCall: $ => seq(
+      $.Ident,
+      "(",
+      optional($.FuncRParams),
+      ")"
+    ),
     
     Exp: $ => choice(
       $.PrimaryExp,
-      seq(
-        $.Ident,
-        "(",
-        optional($.FuncRParams),
-        ")"
-      ),
+      $.FuncCall,
       prec.right('unary', seq("+", $.Exp)),
       prec.right('unary', seq("-", $.Exp)),
       prec.right('unary', seq("!", $.Exp)),

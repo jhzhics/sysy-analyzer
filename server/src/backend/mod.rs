@@ -1,8 +1,40 @@
+use tokio::sync::Mutex;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{LanguageServer, Client};
+use dashmap::DashMap;
+use std::sync::Arc;
+
+mod document_handler;
+mod file_reqs;
+mod semantic_reqs;
+
+const LEGEND_TYPE: &[SemanticTokenType] = &[
+    SemanticTokenType::KEYWORD,
+    SemanticTokenType::FUNCTION,
+    SemanticTokenType::VARIABLE,
+    SemanticTokenType::NUMBER,
+    SemanticTokenType::COMMENT,
+    SemanticTokenType::OPERATOR,
+    SemanticTokenType::TYPE,
+];
 
 pub struct Backend {
     pub client: Client,
+    documents: Arc<DashMap<Url, document_handler::DocHandler>>,
+    parser: Arc<Mutex<tree_sitter::Parser>>,
+}
+
+impl Backend {
+    pub fn new(client: Client) -> Self {
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(&tree_sitter_sysy_parser::LANGUAGE.into()).expect("Error loading Sysy grammar");
+
+        Backend {
+            client,
+            documents: Arc::new(DashMap::new()),
+            parser: Arc::new(Mutex::new(parser)),
+        }
+    }
 }
 
 #[tower_lsp::async_trait]
@@ -17,6 +49,30 @@ impl LanguageServer for Backend {
                 ..Default::default()
             }
         ));
+
+        capabilities.semantic_tokens_provider = Some(
+            SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(
+                SemanticTokensRegistrationOptions {
+                    text_document_registration_options: TextDocumentRegistrationOptions {
+                        document_selector: Some(vec![DocumentFilter {
+                            language: Some("sysy".to_string()),
+                            scheme: Some("file".to_string()),
+                            pattern: None,
+                        }]),
+                    },
+                    semantic_tokens_options: SemanticTokensOptions {
+                        work_done_progress_options: WorkDoneProgressOptions::default(),
+                        legend: SemanticTokensLegend {
+                            token_types: LEGEND_TYPE.to_vec(),
+                            token_modifiers: vec![],
+                        },
+                        range: Some(true),
+                        full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
+                    },
+                    static_registration_options: StaticRegistrationOptions::default(),
+                },
+            )
+        );
 
         capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
 
@@ -34,6 +90,7 @@ impl LanguageServer for Backend {
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) -> () {
         self.client.log_message(MessageType::LOG, format!("Opened src file: {}", params.text_document.uri)).await;
+        self.did_open_handler(params).await;
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
@@ -46,6 +103,7 @@ impl LanguageServer for Backend {
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
         self.client.log_message(MessageType::LOG, format!("Closed src file: {}", params.text_document.uri)).await;
+        self.did_close_handler(params).await;
     }
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
@@ -61,5 +119,26 @@ impl LanguageServer for Backend {
             contents: HoverContents::Scalar(MarkedString::String("This is a hover! ✨".to_string())),
             range: None,
         }))
+    }
+
+    async fn semantic_tokens_full(&self, params: SemanticTokensParams) ->
+    Result<Option<tower_lsp::lsp_types::SemanticTokensResult>, tower_lsp::jsonrpc::Error>
+    {
+        self.client.log_message(MessageType::LOG, format!("Semantic tokens full request for: {:?}", params.text_document)).await;
+        self.semantic_tokens_full_handler(params).await
+    }
+
+    async fn semantic_tokens_full_delta(&self, params: SemanticTokensDeltaParams) ->
+    Result<Option<SemanticTokensFullDeltaResult>, tower_lsp::jsonrpc::Error>
+    {
+        self.client.log_message(MessageType::LOG, format!("Semantic tokens full delta request for: {:?}", params.text_document)).await;
+        Err(tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InvalidRequest))
+    }
+
+    async fn semantic_tokens_range(&self, params: SemanticTokensRangeParams) ->
+    Result<Option<SemanticTokensRangeResult>, tower_lsp::jsonrpc::Error>
+    {
+        self.client.log_message(MessageType::LOG, format!("Semantic tokens range request for: {:?}", params.text_document)).await;
+        Err(tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InvalidRequest))
     }
 }
