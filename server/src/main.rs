@@ -1,6 +1,7 @@
 use tower_lsp::{LspService, Server};
 
 mod backend;
+mod treap_list;
 
 #[tokio::main]
 async fn main() {
