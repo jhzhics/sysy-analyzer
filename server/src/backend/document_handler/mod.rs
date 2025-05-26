@@ -1,18 +1,22 @@
-use std::sync::Arc;
-use tower_lsp::lsp_types::{Position, Range, SemanticToken};
+use tokio::sync::Mutex;
 
-mod  semantic;
+mod semantic;
+mod incremental_update;
 
 pub struct DocHandler
 {
-    tree: Arc<tree_sitter::Tree>,
+    tree: Mutex<tree_sitter::Tree>,
+    doc: Mutex<incremental_update::DynText>,
 }
+
 
 impl DocHandler {
     pub fn new(content: &str, parser: &mut tree_sitter::Parser) -> Self {
         let tree = parser.parse(content, None).expect("Failed to parse document");
+        let doc = incremental_update::DynText::new(content);
         DocHandler {
-            tree: Arc::new(tree),
+            tree: Mutex::new(tree),
+            doc: Mutex::new(doc),
         }
     }
 }

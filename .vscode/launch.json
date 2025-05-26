@@ -3,13 +3,35 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Launch SysY Analyzer Server",
+      "program": "${workspaceFolder}/server/target/debug/sysy-analyzer-server",
+      "args": ["--port", "6009"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "type": "extensionHost",
       "request": "launch",
       "name": "Launch Client",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
       "outFiles": ["${workspaceRoot}/client/out/**/*.js"],
-      "preLaunchTask": "build all"
+      "preLaunchTask": "build all",
+      // Wait for server to be ready
+      "serverReadyAction": {
+        "pattern": "Server initialized",
+        "uriFormat": "tcp://localhost:6009",
+        "action": "debugWithChrome"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Client + Server",
+      "configurations": ["Launch SysY Analyzer Server", "Launch Client"],
+      "preLaunchTask": "build all",
+      "stopAll": true
     }
   ]
 }

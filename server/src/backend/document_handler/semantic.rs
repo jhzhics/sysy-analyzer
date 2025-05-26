@@ -1,16 +1,16 @@
-use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
+use tower_lsp::lsp_types::{SemanticToken};
 
 use super::DocHandler;
 
 impl DocHandler {
-    pub fn get_semantic_tokens(&self) -> Vec<SemanticToken> {
+    pub async fn get_semantic_tokens(&self) -> Vec<SemanticToken> {
         let mut result:Vec<SemanticToken> = Vec::new();
         let mut prev_line = 0;
         let mut prev_start = 0;
-        
+        let tree = self.tree.lock().await;
         // Traverse tree in pre-order
         self.traverse_tree(
-            &self.tree.root_node(), 
+            &tree.root_node(), 
             &mut result, 
             &mut prev_line, 
             &mut prev_start

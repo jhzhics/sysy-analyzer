@@ -95,10 +95,10 @@ impl LanguageServer for Backend {
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         self.client.log_message(MessageType::LOG, format!("Changed src file: {}", params.text_document.uri)).await;
-        for change in params.content_changes {
+        for change in &params.content_changes {
             self.client.log_message(MessageType::LOG, format!("Change: {:?}", change)).await;
         }
-        // You would typically process the changes here
+        self.did_change_handler(params).await;
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {

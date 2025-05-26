@@ -88,8 +88,9 @@ where
 
     pub fn insert_after_k_nodes(
         &mut self,
-        mut new_node: Box<Self>,
-        k: usize)
+        k: usize,
+        mut new_node: Box<Self>
+        )
     {
         assert!(k <= self.size, "k must be less than or equal to the size of the node");
         let left_size = self.left_size();
@@ -111,7 +112,7 @@ where
         if k < left_size {
             insert_position = InsertPosition::Left;
             if let Some(left_node) = self.left.as_mut() {
-                left_node.insert_after_k_nodes(new_node, k);
+                left_node.insert_after_k_nodes(k, new_node);
             } else {
                 self.left = Some(new_node);
             }
@@ -119,7 +120,7 @@ where
         else {
             insert_position = InsertPosition::Right;
             if let Some(right_node) = self.right.as_mut() {
-                right_node.insert_after_k_nodes(new_node, k - left_size - 1);
+                right_node.insert_after_k_nodes(k - left_size - 1, new_node);
             } else {
                 self.right = Some(new_node);
             }
@@ -301,18 +302,18 @@ V: Add<Output = V> + Clone + Default,
         let mut rng = rand::rng();
         let new_node = Box::new(Node::new(value, &mut rng));
         if let Some(root) = self.root.as_mut() {
-            root.insert_after_k_nodes(new_node, root.size);
+            root.insert_after_k_nodes(root.size, new_node);
         } else {
             self.root = Some(new_node);
         }
     }
 
     /// Inserts a new value after the k-th node in the treap list.
-    pub fn insert_after_k_nodes(&mut self, value: V, k: usize) {
+    pub fn insert_after_k_nodes(&mut self, k: usize, value: V) {
         let mut rng = rand::rng();
         let new_node = Box::new(Node::new(value, &mut rng));
         if let Some(root) = self.root.as_mut() {
-            root.insert_after_k_nodes(new_node, k);
+            root.insert_after_k_nodes(k, new_node);
         } else {
             self.root = Some(new_node);
         }
@@ -352,7 +353,7 @@ V: Add<Output = V> + Clone + Default,
     }
 
     /// Returns the number of nodes in the treap list.
-    pub fn size(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.root.as_ref().map_or(0, |node| node.size)
     }
 
@@ -410,19 +411,19 @@ mod tests
     fn test_treap_list1() {
         let mut tl = vec![1, 2, 3, 4, 5].into_iter().collect::<TreapList<i32>>();
         // 1, 2, 3, 4, 5
-        assert_eq!(tl.size(), 5);
+        assert_eq!(tl.len(), 5);
         assert_eq!(tl.sum_range(0..5), 15);
         assert_eq!(tl.get(2).unwrap().clone(), 3);
         assert_eq!(tl.sum_range(1..4), 9);
         tl.push(6);
-        assert_eq!(tl.size(), 6);
+        assert_eq!(tl.len(), 6);
         tl.push(7);
-        assert_eq!(tl.size(), 7);
+        assert_eq!(tl.len(), 7);
         // 1, 2, 3, 4, 5, 6, 7
         assert_eq!(tl.sum_range(4..6), 11); // 5 + 6 
         tl.remove_range(2..5);
         // 1, 2, 6, 7
-        assert_eq!(tl.size(), 4);
+        assert_eq!(tl.len(), 4);
         assert_eq!(tl.sum_range(0..3), 9); // 1 + 2 + 6
         tl.remove_range(0..1);
         // 2, 6, 7
@@ -437,15 +438,15 @@ mod tests
         // Test with an empty treap
         let mut tl = TreapList::<i32>::new();
         assert!(tl.is_empty());
-        assert_eq!(tl.size(), 0);
+        assert_eq!(tl.len(), 0);
         assert_eq!(tl.sum_range(0..0), 0);
         
         // Insert elements at specific positions
         tl.push(10);
-        tl.insert_after_k_nodes(20, 1); // Insert after first element
-        tl.insert_after_k_nodes(15, 1); // Insert between 10 and 20
+        tl.insert_after_k_nodes(1, 20); // Insert after first element
+        tl.insert_after_k_nodes(1, 15); // Insert between 10 and 20
         // Now: [10, 15, 20]
-        assert_eq!(tl.size(), 3);
+        assert_eq!(tl.len(), 3);
         assert_eq!(tl.sum_range(0..3), 45);
         assert_eq!(tl.get(1).unwrap().clone(), 15);
         
@@ -474,13 +475,13 @@ mod tests
         // Remove from middle
         tl.remove_range(2..4);
         // Now: [5, 15, 35, 40]
-        assert_eq!(tl.size(), 4);
+        assert_eq!(tl.len(), 4);
         assert_eq!(tl.sum_range(0..4), 95);
         
         // Insert after removing
-        tl.insert_after_k_nodes(20, 1);
+        tl.insert_after_k_nodes(1, 20);
         // Now: [5, 15, 20, 35, 40]
-        assert_eq!(tl.size(), 5);
+        assert_eq!(tl.len(), 5);
         assert_eq!(tl.sum_range(0..5), 115);
         
         // Test partial sums
@@ -492,7 +493,7 @@ mod tests
         for i in 0..100 {
             large_tl.push(i);
         }
-        assert_eq!(large_tl.size(), 100);
+        assert_eq!(large_tl.len(), 100);
         assert_eq!(large_tl.sum_range(0..100), (0..100).sum::<i32>());
         assert_eq!(large_tl.sum_range(25..75), (25..75).sum::<i32>());
         
@@ -500,12 +501,12 @@ mod tests
         let mut complex_tl = TreapList::new();
         // Build treap with insertion at different positions
         complex_tl.push(50);  // [50]
-        complex_tl.insert_after_k_nodes(30, 0);  // [30, 50]
-        complex_tl.insert_after_k_nodes(70, 0);  // [70, 30, 50]
-        complex_tl.insert_after_k_nodes(10, 2);  // [70, 30, 10, 50]
-        complex_tl.insert_after_k_nodes(90, 1);  // [70, 90, 30, 10, 50]
+        complex_tl.insert_after_k_nodes(0, 30);  // [30, 50]
+        complex_tl.insert_after_k_nodes(0, 70);  // [70, 30, 50]
+        complex_tl.insert_after_k_nodes(2, 10);  // [70, 30, 10, 50]
+        complex_tl.insert_after_k_nodes(1, 90);  // [70, 90, 30, 10, 50]
         
-        assert_eq!(complex_tl.size(), 5);
+        assert_eq!(complex_tl.len(), 5);
         assert_eq!(complex_tl.sum_range(0..5), 250);
         
         // Test range sums in a complex structure
@@ -513,10 +514,10 @@ mod tests
         
         // Remove and insert in complex patterns
         complex_tl.remove_range(1..3);  // [70, 10, 50]
-        complex_tl.insert_after_k_nodes(20, 2);  // [70, 10, 20, 50]
+        complex_tl.insert_after_k_nodes(2, 20);  // [70, 10, 20, 50]
         complex_tl.push(40);  // [70, 10, 20, 50, 40]
         
-        assert_eq!(complex_tl.size(), 5);
+        assert_eq!(complex_tl.len(), 5);
         assert_eq!(complex_tl.sum_range(0..5), 190);
     }
 }
