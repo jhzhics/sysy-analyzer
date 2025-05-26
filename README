@@ -4,5 +4,11 @@
 ## Tree-sitter
 - Install tree-sitter CLI
 
+# Project Structure
+- `.vscode/`: VsCode configuration files for building and debugging
+- `client/`: Contains the client code
+- `server/`: Contains the server code
+- `syntax/`: Contains TextMate syntax definitions for coloring at grammar level
+
 # Usage
 Run vscode launch task `Debug Client + Server`
