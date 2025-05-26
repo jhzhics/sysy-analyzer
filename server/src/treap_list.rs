@@ -69,7 +69,7 @@ where
 
     fn update_tree_sum(&self) {
         self.tree_sum.replace(
-            self.value.clone() + self.left_sum() + self.right_sum()
+            self.left_sum() + self.value.clone() + self.right_sum()
         );
     }
 
@@ -148,7 +148,9 @@ where
     }
 
     pub fn get_kth_node(&self, k: usize) -> Option<&Self> {
-        assert!(k < self.size, "k must be less than the size of the node");
+        if k >= self.size {
+            return None; // k is out of bounds
+        }
         let left_size = self.left_size();
         if k < left_size {
             self.left.as_ref()?.get_kth_node(k)

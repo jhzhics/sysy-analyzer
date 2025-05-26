@@ -8,6 +8,7 @@ mod document_handler;
 mod file_reqs;
 mod semantic_reqs;
 
+#[allow(dead_code)]
 const LEGEND_TYPE: &[SemanticTokenType] = &[
     SemanticTokenType::KEYWORD,
     SemanticTokenType::FUNCTION,

@@ -53,6 +53,11 @@ impl DynText {
             line_bytes.push(line_length + 1);
         });
 
+        if content.is_empty() {
+            content.push(StringWrapper::from("\n".to_string()));
+            line_bytes.push(1);
+        }
+
         DynText {
             content,
             line_bytes,
@@ -87,27 +92,29 @@ impl DynText {
         };
 
         let new_next = format!("{}{}{}", prefix, new_text, subfix);
-        println!("New next: {}", new_next);
-        let new_next_lines = new_next.lines().collect::<Vec<_>>();
-        new_next_lines.iter().for_each(|line| {
-            println!("Line: {}", line);
-        });
         self.line_bytes.remove_range(input_edit.start_position.row..input_edit.old_end_position.row + 1);
-        for line in new_next.lines() {
-            self.line_bytes.insert_after_k_nodes(input_edit.start_position.row, line.bytes().len() + 1);
+        for (idx, line) in new_next.lines().enumerate() {
+            self.line_bytes.insert_after_k_nodes(input_edit.start_position.row + idx, line.bytes().len() + 1);
         }
         self.content.remove_range(input_edit.start_position.row..input_edit.old_end_position.row + 1);
         for (idx, line) in new_next.lines().enumerate() {
             self.content.insert_after_k_nodes(input_edit.start_position.row + idx, StringWrapper::from(
             format!("{}\n", line)));
         }
+
     }
 
     pub fn get_text(&self, row: usize, column: usize) -> &[u8] {
         let line = self.content.get(row);
         if let Some(line) = line {
-            let byte_offset = line.0.char_indices().nth(column).expect("Column index out of bounds").0;
-            &line.0.as_bytes()[byte_offset..]
+            let byte_offset = line.0.char_indices().nth(column);
+            if let Some((byte_offset, _)) = byte_offset {
+                &line.0.as_bytes()[byte_offset..]
+            }
+            else
+            {
+                &[]
+            }
         } else {
             &[]
         }
@@ -152,5 +159,47 @@ impl DocHandler {
         let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&tree), None);
         drop(tree); // Release the lock before updating the tree
         self.tree = tokio::sync::Mutex::new(new_tree.expect("Failed to parse document"));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    impl DynText {
+        pub fn sanity_check(&self, text: &str) {
+            for (line_idx, line) in text.lines().enumerate() {
+                let line_length = line.bytes().len();
+                assert_eq!(*self.line_bytes.get(line_idx).unwrap(), line_length + 1);
+                assert_eq!(self.content.get(line_idx).unwrap().0, format!("{}\n", line));
+            }
+            assert_eq!(self.content.len(), text.lines().count());
+            assert_eq!(self.line_bytes.len(), text.lines().count());
+            assert_eq!(self.content.sum_range(0..self.content.len()).0.trim_end(), text.trim_end());
+        }
+    }
+
+    #[test]
+    fn test_dyn_text1() {
+        let text = "Hello\nWorld\nThis is a test\n";
+        let mut dyn_text = DynText::new(text);
+        dyn_text.sanity_check(text);
+
+        // Test get_byte_offset
+        assert_eq!(dyn_text.get_byte_offset(0, 0), 0);
+        assert_eq!(dyn_text.get_byte_offset(1, 2), 8);
+        assert_eq!(dyn_text.get_byte_offset(2, 5), 17);
+
+        // Test apply_change
+        let input_edit = InputEdit {
+            start_byte: 6,
+            old_end_byte: 11,
+            new_end_byte: 12,
+            start_position: tree_sitter::Point { row: 1, column: 0 },
+            old_end_position: tree_sitter::Point { row: 1, column: 5 },
+            new_end_position: tree_sitter::Point { row: 1, column: 6 },
+        };
+        dyn_text.apply_change(&input_edit, "Universe");
+        dyn_text.sanity_check("Hello\nUniverse\nThis is a test\n");
     }
 }
