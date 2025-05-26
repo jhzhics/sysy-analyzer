@@ -5,4 +5,4 @@
 - Install tree-sitter CLI
 
 # Usage
-Run vscode launch task `Launch Client`
+Run vscode launch task `Debug Client + Server`

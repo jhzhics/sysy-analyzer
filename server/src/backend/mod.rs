@@ -50,29 +50,29 @@ impl LanguageServer for Backend {
             }
         ));
 
-        capabilities.semantic_tokens_provider = Some(
-            SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(
-                SemanticTokensRegistrationOptions {
-                    text_document_registration_options: TextDocumentRegistrationOptions {
-                        document_selector: Some(vec![DocumentFilter {
-                            language: Some("sysy".to_string()),
-                            scheme: Some("file".to_string()),
-                            pattern: None,
-                        }]),
-                    },
-                    semantic_tokens_options: SemanticTokensOptions {
-                        work_done_progress_options: WorkDoneProgressOptions::default(),
-                        legend: SemanticTokensLegend {
-                            token_types: LEGEND_TYPE.to_vec(),
-                            token_modifiers: vec![],
-                        },
-                        range: Some(true),
-                        full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
-                    },
-                    static_registration_options: StaticRegistrationOptions::default(),
-                },
-            )
-        );
+        // capabilities.semantic_tokens_provider = Some(
+        //     SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(
+        //         SemanticTokensRegistrationOptions {
+        //             text_document_registration_options: TextDocumentRegistrationOptions {
+        //                 document_selector: Some(vec![DocumentFilter {
+        //                     language: Some("sysy".to_string()),
+        //                     scheme: Some("file".to_string()),
+        //                     pattern: None,
+        //                 }]),
+        //             },
+        //             semantic_tokens_options: SemanticTokensOptions {
+        //                 work_done_progress_options: WorkDoneProgressOptions::default(),
+        //                 legend: SemanticTokensLegend {
+        //                     token_types: LEGEND_TYPE.to_vec(),
+        //                     token_modifiers: vec![],
+        //                 },
+        //                 range: Some(true),
+        //                 full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
+        //             },
+        //             static_registration_options: StaticRegistrationOptions::default(),
+        //         },
+        //     )
+        // );
 
         capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
 

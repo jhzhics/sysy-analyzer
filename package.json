@@ -16,8 +16,16 @@
     "languages": [
       {
         "id": "sysy",
-        "aliases": ["Sysy", "sysy"],
-        "extensions": [".sy"]
+        "aliases": ["SySy", "sysy"],
+        "extensions": [".sy"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sysy",
+        "scopeName": "source.sysy",
+        "path": "./syntaxes/sysy.tmLanguage.json"
       }
     ]
   },

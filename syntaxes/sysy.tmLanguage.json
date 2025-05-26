@@ -1,0 +1,139 @@
+{
+  "name": "SySy",
+  "scopeName": "source.sysy",
+  "fileTypes": ["sy"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#functions" },
+    { "include": "#variables" },
+    { "include": "#constants" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.sysy",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.sysy",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "captures": {
+            "0": { "name": "punctuation.definition.comment.sysy" }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.sysy",
+          "match": "\\b(if|else|while|break|continue|return)\\b"
+        },
+        {
+          "name": "storage.type.sysy",
+          "match": "\\b(int|void|const)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "meta.function.sysy",
+          "match": "(int|void)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": { "name": "storage.type.sysy" },
+            "2": { "name": "entity.name.function.sysy" }
+          }
+        },
+        {
+          "name": "meta.function.call.sysy",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": { "name": "entity.name.function.sysy" }
+          }
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.declaration.sysy",
+          "match": "(int)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "storage.type.sysy" },
+            "2": { "name": "variable.other.sysy" }
+          }
+        },
+        {
+          "name": "variable.other.sysy",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.sysy",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.decimal.sysy",
+          "match": "\\b[1-9][0-9]*\\b"
+        },
+        {
+          "name": "constant.numeric.octal.sysy",
+          "match": "\\b0[0-7]*\\b"
+        },
+        {
+          "name": "constant.numeric.hex.sysy",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.sysy",
+          "match": "\\+|\\-|\\*|/|%"
+        },
+        {
+          "name": "keyword.operator.comparison.sysy",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.logical.sysy",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.assignment.sysy",
+          "match": "="
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.sysy",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.sysy",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

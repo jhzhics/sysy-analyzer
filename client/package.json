@@ -24,23 +24,6 @@
     "onFileSystem:**/sysy-analyzer-server"
   ],
   "main": "./out/extension.js",
-  "contributes": {
-    "languages": [
-      {
-        "id": "sysy",
-        "aliases": ["SySy", "sysy"],
-        "extensions": [".sy"],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "sysy",
-        "scopeName": "source.sysy",
-        "path": "./syntaxes/sysy.tmLanguage.json"
-      }
-    ]
-  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
