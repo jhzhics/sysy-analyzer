@@ -15,11 +15,11 @@ module.exports = grammar({
     /\s/
   ],
 
-  conflicts: $ => [
+  conflicts: _ => [
     // Add any conflicts here if needed
   ],
 
-  precedences: $ => [
+  precedences: _ => [
     // Precedence from lowest to highest
     [
       'logical_or',
@@ -35,11 +35,6 @@ module.exports = grammar({
   rules: {
     source_file: $ => optional($.CompUnit),
 
-    comment: $ => token(choice(
-      /\/\/[^\n]*/,
-      /\/\*[^*]*\*+([^/*][^*]*\*+)*\//
-    )),
-
     CompUnit: $ => repeat1(choice($.Decl, $.FuncDef)),
     
     Type: $ => choice(
@@ -47,10 +42,10 @@ module.exports = grammar({
       "void"),
 
     FuncDef: $ => seq(
-      $.Type,
-      $.Ident,
+      field("type", $.Type),
+      field("ident", $.Ident),
       "(",
-      optional($.FuncFParams),
+      optional(field("params", $.FuncFParams)),
       ")",
       $.Block
     ),
@@ -60,13 +55,16 @@ module.exports = grammar({
       repeat(seq(",", $.FuncFParam))
     ),
 
+    FuncArraryQualifier: $ => seq(
+      "[",
+      "]",
+      repeat(seq("[", $.ConstExp, "]"))
+    ),
+
     FuncFParam: $ => seq(
-      $.Type,
-      $.Ident,
-      optional(seq(
-        "[",
-        "]",
-        repeat(seq("[", $.ConstExp, "]"))
+      field("type", $.Type),
+      field("ident", $.Ident),
+      optional(field("array_qualifier", $.FuncArraryQualifier
       ))
     ),
 
@@ -76,23 +74,25 @@ module.exports = grammar({
     ),
 
     VarDecl: $ => seq(
-      $.Type,
-      $.VarDef,
+      field("type", $.Type),
+      field("defs", $.VarDef),
       repeat(seq(",", $.VarDef)),
       ";"
     ),
 
     ConstDecl: $ => seq(
       "const",
-      $.Type,
-      $.ConstDef,
-      repeat(seq(",", $.ConstDef)),
+      field("type", $.Type),
+      field("defs", $.ConstDef,
+      repeat(seq(",", $.ConstDef))),
       ";"
     ),
 
+    ConstArrayQualifier: $ => repeat1(seq("[", $.ConstExp, "]")),
+
     ConstDef: $ => seq(
-      $.Ident,
-      repeat(seq("[", $.ConstExp, "]")),
+      field("ident", $.Ident),
+      optional(field("array_qualifier", $.ConstArrayQualifier)),
       "=",
       $.ConstInitVal
     ),
@@ -111,14 +111,16 @@ module.exports = grammar({
 
     ConstExp: $ => $.Exp,
 
+    VarArrayQualifier: $ => repeat1(seq("[", $.Exp, "]")),
+
     VarDef: $ => choice(
       seq(
-        $.Ident,
-        repeat(seq("[", $.Exp, "]"))
+        field("ident", $.Ident),
+        optional(field("array_qualifier", $.VarArrayQualifier))
       ),
       seq(
-        $.Ident,
-        repeat(seq("[", $.Exp, "]")),
+        field("ident", $.Ident),
+        optional(field("array_qualifier", $.VarArrayQualifier)),
         "=",
         $.InitVal
       )
@@ -208,5 +210,9 @@ module.exports = grammar({
     Decimal: $ => /[1-9][0-9]*/,
     Octal: $ => /0[0-7]*/,
     Hexadecimal: $ => /0[xX][0-9a-fA-F]+/,
+
+    comment: _ => token(choice(
+          /\/\*[^*]*\*+([^/*][^*]*\*+)*\//, 
+          /\/\/[^\n]*/))
   }
 });

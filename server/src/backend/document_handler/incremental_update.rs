@@ -2,7 +2,7 @@ use std::ops::{Add, Deref};
 
 use super::DocHandler;
 use tower_lsp::lsp_types::{TextDocumentContentChangeEvent};
-use tree_sitter::InputEdit;
+use tree_sitter::{InputEdit, Point};
 use treaplist::TreapList;
 
 #[derive(Debug, Clone, Default)]
@@ -118,6 +118,35 @@ impl DynText {
         } else {
             &[]
         }
+    }
+
+    pub fn get_text_range(&self, start: Point, end: Point) -> String {
+        assert!(start.row < end.row || (start.row == end.row && start.column <= end.column), "Invalid range");
+        if start.row == end.row {
+            let line = self.content.get(start.row).expect("Start row should exist");
+            let start_byte = line.0.char_indices().nth(start.column).expect("Start column out of bounds").0;
+            let end_byte = line.0.char_indices().nth(end.column).expect("End column out of bounds").0;
+            return line.0[start_byte..end_byte].to_string();
+        }
+        else {
+            let mut result = String::new();
+            // Get the first line
+            if let Some(first_line) = self.content.get(start.row) {
+                let start_byte = first_line.0.char_indices().nth(start.column).expect("Start column out of bounds").0;
+                result.push_str(&first_line.0[start_byte..]);
+            }
+            // Get the lines in between
+            let middle_lines = self.content.sum_range(start.row + 1..end.row);
+            result.push_str(&middle_lines.0);
+            // Get the last line
+            if let Some(last_line) = self.content.get(end.row) {
+                let end_byte = last_line.0.char_indices().nth(end.column).expect("End column out of bounds").0;
+                result.push_str(&last_line.0[..end_byte]);
+            }
+            result
+        }
+    
+    
     }
 
     pub fn get_line(&self, row: usize) -> Option<&str> {
