@@ -926,9 +926,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.45.0"
+version = "1.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2513ca694ef9ede0fb23fe71a4ee4107cb102b9dc1930f6d0fd77aae068ae165"
+checksum = "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779"
 dependencies = [
  "backtrace",
  "bytes",
@@ -1059,9 +1059,9 @@ dependencies = [
 
 [[package]]
 name = "treaplist"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f8046e9e7811559eb92e46c46314e10bba97ae05765558f81fa60e2ea70be44"
+checksum = "90dacf813f6c76c38fdbce87264406c75677d9139ca26a19cd5ed2ea44e72e6f"
 dependencies = [
  "rand",
 ]
