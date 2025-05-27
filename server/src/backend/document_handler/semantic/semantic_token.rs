@@ -1,13 +1,12 @@
 use tower_lsp::lsp_types::{SemanticToken};
-
-use super::{incremental_update::DynText, DocHandler};
+use super::super::{incremental_update::DynText, DocHandler};
 
 impl DocHandler {
     pub async fn get_semantic_tokens(&self) -> Vec<SemanticToken> {
         let mut result:Vec<SemanticToken> = Vec::new();
         let mut prev_line = 0;
         let mut prev_start = 0;
-        let tree = self.tree.lock().await;
+        let tree = self.syntax_tree.lock().await;
         let doc = self.doc.lock().await;
         // Traverse tree in pre-order
         self.traverse_tree(
@@ -136,6 +135,4 @@ impl DocHandler {
             }
         }
     }
-
-    
 }

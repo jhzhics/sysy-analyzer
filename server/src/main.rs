@@ -3,7 +3,6 @@ use clap::{command, Parser};
 use std::net::SocketAddr;
 
 mod backend;
-mod treap_list;
 
 #[derive(Parser, Debug)]
 #[command(name = "sysy-lsp-server", version = "0.1.0", about = "SysY Language Server Protocol server")]

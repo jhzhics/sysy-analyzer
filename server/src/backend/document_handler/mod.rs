@@ -5,7 +5,7 @@ mod incremental_update;
 
 pub struct DocHandler
 {
-    tree: Mutex<tree_sitter::Tree>,
+    syntax_tree: Mutex<tree_sitter::Tree>,
     doc: Mutex<incremental_update::DynText>,
 }
 
@@ -15,7 +15,7 @@ impl DocHandler {
         let tree = parser.parse(content, None).expect("Failed to parse document");
         let doc = incremental_update::DynText::new(content);
         DocHandler {
-            tree: Mutex::new(tree),
+            syntax_tree: Mutex::new(tree),
             doc: Mutex::new(doc),
         }
     }

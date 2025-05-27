@@ -909,6 +909,7 @@ dependencies = [
  "rand",
  "tokio",
  "tower-lsp",
+ "treaplist",
  "tree-sitter",
  "tree-sitter-sysy-parser",
 ]
@@ -1054,6 +1055,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "treaplist"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f8046e9e7811559eb92e46c46314e10bba97ae05765558f81fa60e2ea70be44"
+dependencies = [
+ "rand",
 ]
 
 [[package]]

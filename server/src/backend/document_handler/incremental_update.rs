@@ -3,7 +3,7 @@ use std::ops::{Add, Deref};
 use super::DocHandler;
 use tower_lsp::lsp_types::{TextDocumentContentChangeEvent};
 use tree_sitter::InputEdit;
-use crate::treap_list::TreapList;
+use treaplist::TreapList;
 
 #[derive(Debug, Clone, Default)]
 struct StringWrapper(String);
@@ -150,15 +150,29 @@ impl DocHandler {
             column: new_end_column },
         };
         
-        let mut tree = self.tree.lock().await;
+        let mut tree = self.syntax_tree.lock().await;
         tree.edit(&input_edit);
         doc.apply_change(&input_edit, &change.text);
         let mut get_text_callback = |_: usize, position: tree_sitter::Point| {
             doc.get_text(position.row, position.column)
         };
-        let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&tree), None);
+        let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&tree), None).
+        expect("Failed to parse document");
+        let changes = new_tree.changed_ranges(&tree);
+        for change in changes {
+            println!("Changed range: {:?}", change);
+        }
+        // Print the root and all children
+        if let Some(root_node) = new_tree.root_node().child(0) {
+            println!("Root node: {:?}", root_node);
+            for i in 0..root_node.child_count() {
+                if let Some(child) = root_node.child(i) {
+                    println!("Child {}: {:?}", i, child);
+                }
+            }
+        }
         drop(tree); // Release the lock before updating the tree
-        self.tree = tokio::sync::Mutex::new(new_tree.expect("Failed to parse document"));
+        self.syntax_tree = tokio::sync::Mutex::new(new_tree);
     }
 }
 
