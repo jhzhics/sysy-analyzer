@@ -45,14 +45,12 @@ module.exports = grammar({
       field("type", $.Type),
       field("ident", $.Ident),
       "(",
-      optional(field("params", $.FuncFParams)),
+      optional(seq(
+      field("params", $.FuncFParam),
+      repeat(seq(",", field("params", $.FuncFParam)))
+      )),
       ")",
       $.Block
-    ),
-
-    FuncFParams: $ => seq(
-      $.FuncFParam,
-      repeat(seq(",", $.FuncFParam))
     ),
 
     FuncArraryQualifier: $ => seq(
@@ -76,7 +74,7 @@ module.exports = grammar({
     VarDecl: $ => seq(
       field("type", $.Type),
       field("defs", $.VarDef),
-      repeat(seq(",", $.VarDef)),
+      repeat(seq(",", field("defs", $.VarDef))),
       ";"
     ),
 
@@ -84,7 +82,7 @@ module.exports = grammar({
       "const",
       field("type", $.Type),
       field("defs", $.ConstDef,
-      repeat(seq(",", $.ConstDef))),
+      repeat(seq(",", field("defs", $.ConstDef)))),
       ";"
     ),
 

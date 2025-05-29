@@ -1,5 +1,6 @@
 use std::ops::{DerefMut};
 
+use tokio::sync::Mutex;
 use tower_lsp::lsp_types::{DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams};
 use super::Backend;
 use super::document_handler::DocHandler;
@@ -10,12 +11,14 @@ impl Backend {
         let mut parser = self.parser.lock().await;
         let parser_ref = parser.deref_mut();
         let doc_handler = DocHandler::new(text, parser_ref);
-        self.documents.insert(params.text_document.uri.clone(), doc_handler);
+        self.documents.insert(params.text_document.uri.clone(), 
+            Mutex::new(doc_handler));
     }
 
     pub async fn did_change_handler(&self, params: DidChangeTextDocumentParams) {
         let uri = params.text_document.uri.clone();
-        let mut handler = self.documents.get_mut(&uri).expect("Document not found");
+        let handler = self.documents.get_mut(&uri).expect("Document not found");
+        let mut handler = handler.lock().await;
         let mut parser = self.parser.lock().await;
         for change in params.content_changes {
             handler.incremental_update(&change, parser.deref_mut()).await;

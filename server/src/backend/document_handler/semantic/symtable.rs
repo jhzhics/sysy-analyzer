@@ -1,11 +1,13 @@
 use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
 pub enum Symbol {
     Variable {
         type_: String,
     },
     Function {
         return_type: String,
-        parameters: Vec<Symbol>,
+        params: Vec<Symbol>,
     },
 }
 

@@ -6,7 +6,6 @@ use std::sync::Arc;
 
 mod document_handler;
 mod file_reqs;
-mod semantic_reqs;
 
 #[allow(dead_code)]
 const LEGEND_TYPE: &[SemanticTokenType] = &[
@@ -21,7 +20,7 @@ const LEGEND_TYPE: &[SemanticTokenType] = &[
 
 pub struct Backend {
     pub client: Client,
-    documents: Arc<DashMap<Url, document_handler::DocHandler>>,
+    documents: Arc<DashMap<Url, Mutex<document_handler::DocHandler>>>,
     parser: Arc<Mutex<tree_sitter::Parser>>,
 }
 
@@ -50,30 +49,6 @@ impl LanguageServer for Backend {
                 ..Default::default()
             }
         ));
-
-        // capabilities.semantic_tokens_provider = Some(
-        //     SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(
-        //         SemanticTokensRegistrationOptions {
-        //             text_document_registration_options: TextDocumentRegistrationOptions {
-        //                 document_selector: Some(vec![DocumentFilter {
-        //                     language: Some("sysy".to_string()),
-        //                     scheme: Some("file".to_string()),
-        //                     pattern: None,
-        //                 }]),
-        //             },
-        //             semantic_tokens_options: SemanticTokensOptions {
-        //                 work_done_progress_options: WorkDoneProgressOptions::default(),
-        //                 legend: SemanticTokensLegend {
-        //                     token_types: LEGEND_TYPE.to_vec(),
-        //                     token_modifiers: vec![],
-        //                 },
-        //                 range: Some(true),
-        //                 full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
-        //             },
-        //             static_registration_options: StaticRegistrationOptions::default(),
-        //         },
-        //     )
-        // );
 
         capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
 
@@ -120,26 +95,5 @@ impl LanguageServer for Backend {
             contents: HoverContents::Scalar(MarkedString::String("This is a hover! ✨".to_string())),
             range: None,
         }))
-    }
-
-    async fn semantic_tokens_full(&self, params: SemanticTokensParams) ->
-    Result<Option<tower_lsp::lsp_types::SemanticTokensResult>, tower_lsp::jsonrpc::Error>
-    {
-        self.client.log_message(MessageType::LOG, format!("Semantic tokens full request for: {:?}", params.text_document)).await;
-        self.semantic_tokens_full_handler(params).await
-    }
-
-    async fn semantic_tokens_full_delta(&self, params: SemanticTokensDeltaParams) ->
-    Result<Option<SemanticTokensFullDeltaResult>, tower_lsp::jsonrpc::Error>
-    {
-        self.client.log_message(MessageType::LOG, format!("Semantic tokens full delta request for: {:?}", params.text_document)).await;
-        Err(tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InvalidRequest))
-    }
-
-    async fn semantic_tokens_range(&self, params: SemanticTokensRangeParams) ->
-    Result<Option<SemanticTokensRangeResult>, tower_lsp::jsonrpc::Error>
-    {
-        self.client.log_message(MessageType::LOG, format!("Semantic tokens range request for: {:?}", params.text_document)).await;
-        Err(tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InvalidRequest))
     }
 }

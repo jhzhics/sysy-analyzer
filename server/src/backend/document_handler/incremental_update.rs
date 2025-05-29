@@ -1,4 +1,4 @@
-use std::ops::{Add, Deref};
+use std::{any::Any, ops::{Add, Deref}};
 
 use super::DocHandler;
 use tower_lsp::lsp_types::{TextDocumentContentChangeEvent};
@@ -53,10 +53,8 @@ impl DynText {
             line_bytes.push(line_length + 1);
         });
 
-        if content.is_empty() {
-            content.push(StringWrapper::from("\n".to_string()));
-            line_bytes.push(1);
-        }
+        content.push(StringWrapper::from("\n".to_string()));
+        line_bytes.push(1);
 
         DynText {
             content,
@@ -148,18 +146,13 @@ impl DynText {
     
     
     }
-
-    pub fn get_line(&self, row: usize) -> Option<&str> {
-        self.content.get(row).map(|s| s.0.as_str())
-    }
 }
 
 impl DocHandler {
         pub async fn incremental_update(&mut self, change: &TextDocumentContentChangeEvent, parser: &mut tree_sitter::Parser) {
-        let mut doc = self.doc.lock().await;
         let tower_lsp::lsp_types::Range{ start, end} = change.range.expect("Range should be defined");
-        let start_byte = doc.get_byte_offset(start.line as usize, start.character as usize);
-        let old_end_byte = doc.get_byte_offset(end.line as usize, end.character as usize);
+        let start_byte = self.doc.get_byte_offset(start.line as usize, start.character as usize);
+        let old_end_byte = self.doc.get_byte_offset(end.line as usize, end.character as usize);
         let new_end_byte = start_byte + change.text.bytes().len();
         let text_lf_count = change.text.chars().filter(|&c| c == '\n').count();
         let new_end_row = start.line as usize + text_lf_count;
@@ -178,30 +171,23 @@ impl DocHandler {
             new_end_position: tree_sitter::Point { row: new_end_row,              
             column: new_end_column },
         };
-        
-        let mut tree = self.syntax_tree.lock().await;
-        tree.edit(&input_edit);
-        doc.apply_change(&input_edit, &change.text);
+
+        self.syntax_tree.edit(&input_edit);
+        self.doc.apply_change(&input_edit, &change.text);
         let mut get_text_callback = |_: usize, position: tree_sitter::Point| {
-            doc.get_text(position.row, position.column)
+            self.doc.get_text(position.row, position.column)
         };
-        let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&tree), None).
+        let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&self.syntax_tree), None).
         expect("Failed to parse document");
-        let changes = new_tree.changed_ranges(&tree);
-        for change in changes {
+
+        // Print the root and all children
+        println!("Input Edit Range: {} {}", input_edit.start_byte, input_edit.old_end_byte);
+        for change in new_tree.changed_ranges(&self.syntax_tree) {
             println!("Changed range: {:?}", change);
         }
-        // Print the root and all children
-        if let Some(root_node) = new_tree.root_node().child(0) {
-            println!("Root node: {:?}", root_node);
-            for i in 0..root_node.child_count() {
-                if let Some(child) = root_node.child(i) {
-                    println!("Child {}: {:?}", i, child);
-                }
-            }
-        }
-        drop(tree); // Release the lock before updating the tree
-        self.syntax_tree = tokio::sync::Mutex::new(new_tree);
+        new_tree.root_node().descendant_for_byte_range(start, end)
+        self.semantic_tree.incremental_update(input_edit, &new_tree);
+        self.syntax_tree = new_tree;
     }
 }
 
