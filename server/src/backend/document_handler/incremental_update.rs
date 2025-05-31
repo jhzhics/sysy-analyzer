@@ -181,10 +181,13 @@ impl DocHandler {
         let new_tree = parser.parse_with_options(&mut get_text_callback, Some(&self.syntax_tree), None).
         expect("Failed to parse document");
 
-        // Print the root and all children
-        println!("Input Edit Range: {} {}", input_edit.start_byte, input_edit.old_end_byte);
-        for change in new_tree.changed_ranges(&self.syntax_tree) {
-            println!("Changed range: {:?}", change);
+        #[cfg(debug_assertions)]
+        {
+            // Print the root and all children
+            println!("Input Edit Range: {} {}", input_edit.start_byte, input_edit.old_end_byte);
+            for change in new_tree.changed_ranges(&self.syntax_tree) {
+                println!("Changed range: {:?}", change);
+            }
         }
         
         self.syntax_tree = new_tree;
