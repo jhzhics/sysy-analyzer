@@ -6,7 +6,8 @@ use std::sync::Arc;
 
 mod document_handler;
 mod file_reqs;
-mod definition_req;
+mod definition_reqs;
+mod completion_reqs;
 
 #[allow(dead_code)]
 const LEGEND_TYPE: &[SemanticTokenType] = &[
@@ -53,6 +54,9 @@ impl LanguageServer for Backend {
 
         capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
         capabilities.definition_provider = Some(OneOf::Left(true));
+        capabilities.completion_provider = Some(CompletionOptions {
+            ..Default::default()
+        });
 
         let initialize_result = InitializeResult {
             capabilities,
@@ -102,5 +106,11 @@ impl LanguageServer for Backend {
     > {
         self.client.log_message(MessageType::LOG, format!("Goto declaration request at position: {:?}", params.text_document_position_params.position)).await;
         self.goto_definition_handler(params).await
+    }
+
+    async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>,
+        tower_lsp::jsonrpc::Error> {
+        self.client.log_message(MessageType::LOG, format!("Completion request at position: {:?}", params.text_document_position.position)).await;
+        self.completion_handler(params).await
     }
 }

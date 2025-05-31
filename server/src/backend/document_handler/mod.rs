@@ -1,5 +1,6 @@
 mod incremental_update;
-mod  query_definition;
+mod query_definition;
+mod query_token;
 pub struct DocHandler
 {
     syntax_tree: tree_sitter::Tree,

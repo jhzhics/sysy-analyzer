@@ -121,9 +121,10 @@ impl DynText {
     pub fn get_text_range(&self, start: Point, end: Point) -> String {
         assert!(start.row < end.row || (start.row == end.row && start.column <= end.column), "Invalid range");
         if start.row == end.row {
-            let line = self.content.get(start.row).expect("Start row should exist");
-            let start_byte = line.0.char_indices().nth(start.column).expect("Start column out of bounds").0;
-            let end_byte = line.0.char_indices().nth(end.column).expect("End column out of bounds").0;
+            static EMPTY_STRING_WRAPPER: StringWrapper = StringWrapper(String::new());
+            let line = self.content.get(start.row).unwrap_or(&EMPTY_STRING_WRAPPER);
+            let start_byte = line.0.char_indices().nth(start.column).unwrap_or((0, '\0')).0;
+            let end_byte = line.0.char_indices().nth(end.column).unwrap_or((line.0.len(), '\0')).0;
             return line.0[start_byte..end_byte].to_string();
         }
         else {
