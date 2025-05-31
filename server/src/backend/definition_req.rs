@@ -1,4 +1,4 @@
-use tower_lsp::lsp_types::{Hover, HoverParams, HoverContents, Position};
+use tower_lsp::lsp_types::{Hover, HoverParams, HoverContents, Position, GotoDefinitionParams, GotoDefinitionResponse};
 use tree_sitter::Point;
 
 use super::Backend;
@@ -45,4 +45,36 @@ impl Backend {
             })
         )
     }
+
+    pub async fn goto_definition_handler(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>, tower_lsp::jsonrpc::Error>
+    {
+        let doc_handler = self.documents.get(&params.text_document_position_params.text_document.uri)
+            .ok_or_else(|| tower_lsp::jsonrpc::Error::invalid_params("Document not found"))?;
+        let doc = doc_handler.lock().await;
+        let pos = Position {
+            line: params.text_document_position_params.position.line,
+            character: params.text_document_position_params.position.character,
+        };
+        let definition = doc.find_definition(pos).ok_or_else(|| {
+            tower_lsp::jsonrpc::Error::invalid_params("Definition not found at the given position")
+        })?;
+
+        let location = tower_lsp::lsp_types::Location {
+            uri: params.text_document_position_params.text_document.uri,
+            range: tower_lsp::lsp_types::Range {
+                start: Position {
+                    line: definition.start.line as u32,
+                    character: definition.start.character as u32,
+                },
+                end: Position {
+                    line: definition.end.line as u32,
+                    character: definition.end.character as u32,
+                },
+            },
+        };
+        Ok(Some(GotoDefinitionResponse::Scalar(location)))
+    }               
 }

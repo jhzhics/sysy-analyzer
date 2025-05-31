@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 mod document_handler;
 mod file_reqs;
-mod hover_req;
+mod definition_req;
 
 #[allow(dead_code)]
 const LEGEND_TYPE: &[SemanticTokenType] = &[
@@ -52,6 +52,7 @@ impl LanguageServer for Backend {
         ));
 
         capabilities.hover_provider = Some(HoverProviderCapability::Simple(true));
+        capabilities.definition_provider = Some(OneOf::Left(true));
 
         let initialize_result = InitializeResult {
             capabilities,
@@ -88,11 +89,18 @@ impl LanguageServer for Backend {
         Ok(())
     }
 
-    // Add other handlers as needed (e.g., hover, completion, etc.)
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
         self.client.log_message(MessageType::LOG, format!("Hover request at position: {:?}", params.text_document_position_params.position)).await;
-        // Return a dummy hover for now
-        
         self.hover_handler(params).await
+    }
+
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>,
+        tower_lsp::jsonrpc::Error
+    > {
+        self.client.log_message(MessageType::LOG, format!("Goto declaration request at position: {:?}", params.text_document_position_params.position)).await;
+        self.goto_definition_handler(params).await
     }
 }

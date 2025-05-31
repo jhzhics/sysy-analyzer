@@ -16,7 +16,7 @@ fn find_definition<'a>(ident: &'a str, mut n: tree_sitter::Node<'a>, get_text_ra
                     let def_name = get_text_range(
                         def_ident.start_position(), def_ident.end_position());
                     if def_name == ident {
-                        return Some(def);
+                        return Some(n);
                     }
                 }
             }
