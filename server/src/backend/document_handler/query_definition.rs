@@ -6,7 +6,24 @@ use tree_sitter::{Node, Point};
 fn find_definition<'a>(ident: &'a str, mut n: tree_sitter::Node<'a>, get_text_range: &'a impl Fn(tree_sitter::Point, tree_sitter::Point) -> String)
 -> Option<Node<'a>>
 {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    enum LastJump
+    {
+        FromSibling,
+        FromChild,
+        NoJump,
+    }
+    let mut last_jump = LastJump::NoJump;
     loop {
+        if n.prev_named_sibling().is_some() {
+            n = n.prev_named_sibling().unwrap();
+            last_jump = LastJump::FromSibling;
+        } else if n.parent().is_some() {
+            n = n.parent().unwrap();
+            last_jump = LastJump::FromChild;
+        } else {
+            break;
+        }
         if n.kind() == "VarDecl" || n.kind() == "ConstDecl" {
             // Check variable/constant definitions
             let mut cursor = n.walk();
@@ -31,6 +48,11 @@ fn find_definition<'a>(ident: &'a str, mut n: tree_sitter::Node<'a>, get_text_ra
             return Some(n);
             }
             
+            if last_jump == LastJump::FromSibling
+            {
+                continue;
+            }
+        
             // Check function parameters
             let mut cursor = n.walk();
             let params = n.children_by_field_name("params", &mut cursor);
@@ -43,13 +65,6 @@ fn find_definition<'a>(ident: &'a str, mut n: tree_sitter::Node<'a>, get_text_ra
                 }
             }
             }
-        }
-        if n.prev_named_sibling().is_some() {
-            n = n.prev_named_sibling().unwrap();
-        } else if n.parent().is_some() {
-            n = n.parent().unwrap();
-        } else {
-            break;
         }
     }
     None

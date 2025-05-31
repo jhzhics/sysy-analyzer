@@ -23,12 +23,21 @@ impl std::fmt::Display for SymbolKind {
 fn query_symbols(mut n: tree_sitter::Node, get_text_range: &impl Fn(tree_sitter::Point, tree_sitter::Point) -> String) -> Vec<Symbol>
 {
     let mut symbols = Vec::new();
-
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    enum LastJump
+    {
+        FromSibling,
+        FromChild,
+        NoJump,
+    }
+    let mut last_jump = LastJump::NoJump;
     loop {
         if n.prev_named_sibling().is_some() {
-        n = n.prev_named_sibling().unwrap();
+            n = n.prev_named_sibling().unwrap();
+            last_jump = LastJump::FromSibling;
         } else if n.parent().is_some() {
             n = n.parent().unwrap();
+            last_jump = LastJump::FromChild;
         } else {
             break;
         }
@@ -61,6 +70,10 @@ fn query_symbols(mut n: tree_sitter::Node, get_text_range: &impl Fn(tree_sitter:
                 kind: SymbolKind::Function,
             });
             
+            if last_jump == LastJump::FromSibling
+            {
+                continue;
+            }
             // Check function parameters
             let mut cursor = n.walk();
             let params = n.children_by_field_name("params", &mut cursor);
