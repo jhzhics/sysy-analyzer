@@ -1,4 +1,4 @@
-use std::{any::Any, ops::{Add, Deref}};
+use std::{ops::{Add, Deref}};
 
 use super::DocHandler;
 use tower_lsp::lsp_types::{TextDocumentContentChangeEvent};
@@ -185,9 +185,12 @@ impl DocHandler {
         for change in new_tree.changed_ranges(&self.syntax_tree) {
             println!("Changed range: {:?}", change);
         }
-        new_tree.root_node().descendant_for_byte_range(start, end)
-        self.semantic_tree.incremental_update(input_edit, &new_tree);
+        
         self.syntax_tree = new_tree;
+    }
+
+    pub fn get_text_range(&self, start: Point, end: Point) -> String {
+        self.doc.get_text_range(start, end)
     }
 }
 

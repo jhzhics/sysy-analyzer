@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 mod document_handler;
 mod file_reqs;
+mod hover_req;
 
 #[allow(dead_code)]
 const LEGEND_TYPE: &[SemanticTokenType] = &[
@@ -91,9 +92,7 @@ impl LanguageServer for Backend {
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
         self.client.log_message(MessageType::LOG, format!("Hover request at position: {:?}", params.text_document_position_params.position)).await;
         // Return a dummy hover for now
-        Ok(Some(Hover {
-            contents: HoverContents::Scalar(MarkedString::String("This is a hover! ✨".to_string())),
-            range: None,
-        }))
+        
+        self.hover_handler(params).await
     }
 }

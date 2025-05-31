@@ -35,7 +35,7 @@ module.exports = grammar({
   rules: {
     source_file: $ => optional($.CompUnit),
 
-    CompUnit: $ => repeat1(choice($.Decl, $.FuncDef)),
+    CompUnit: $ => repeat1(choice($._Decl, $.FuncDef)),
     
     Type: $ => choice(
       "int",
@@ -66,7 +66,7 @@ module.exports = grammar({
       ))
     ),
 
-    Decl: $ => choice(
+    _Decl: $ => choice(
       $.VarDecl,
       $.ConstDecl
     ),
@@ -144,25 +144,25 @@ module.exports = grammar({
       seq("(", $.Exp, ")")
     ),
 
-    Stmt: $ => choice(
+    _Stmt: $ => choice(
       seq($.Lval, "=", $.Exp, ";"),
       seq(optional($.Exp), ";"),
       $.Block,
-      prec.right(seq("if", "(", $.Exp, ")", $.Stmt, optional(seq("else", $.Stmt)))),
-      seq("while", "(", $.Exp, ")", $.Stmt),
+      prec.right(seq("if", "(", $.Exp, ")", $._Stmt, optional(seq("else", $._Stmt)))),
+      seq("while", "(", $.Exp, ")", $._Stmt),
       seq("break", ";"),
       seq("continue", ";"),
       seq("return", optional($.Exp), ";")
     ),
 
-    BlockItem: $ => choice(
-      $.Decl,
-      $.Stmt
+    _BlockItem: $ => choice(
+      $._Decl,
+      $._Stmt
     ),
 
     Block: $ => seq(
       "{",
-      repeat($.BlockItem),
+      repeat($._BlockItem),
       "}"
     ),
 
