@@ -1,6 +1,9 @@
 mod incremental_update;
 mod query_definition;
 mod query_token;
+mod query_symbols;
+
+pub use query_symbols::SymbolKind;
 pub struct DocHandler
 {
     syntax_tree: tree_sitter::Tree,

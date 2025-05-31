@@ -1,5 +1,6 @@
 use super::Backend;
 use tower_lsp::lsp_types::{CompletionItem, CompletionParams, CompletionResponse};
+use super::document_handler::SymbolKind;
 use tree_sitter::Point;
 
 const KEYWORDS: &[&str] = &[
@@ -36,23 +37,35 @@ impl Backend {
                 },
             );
 
-        let mut completions = vec![];
+        let mut completions:Vec<CompletionItem> = Vec::new();
         for keyword in KEYWORDS {
-            if keyword.starts_with(&last_token_text) {
-                completions.push(keyword.to_string());
+            if keyword.starts_with(&last_token_text.to_lowercase()) {
+                completions.push(CompletionItem {
+                    label: keyword.to_string(),
+                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                });
             }
+        }
+        let symbols = doc_handler.query_symbols(position);
+        for symbol in symbols {
+            if symbol.name.to_lowercase().starts_with(&last_token_text.to_lowercase()) {
+                let kind = match symbol.kind {
+                    SymbolKind::Function => tower_lsp::lsp_types::CompletionItemKind::FUNCTION,
+                    SymbolKind::Variable => tower_lsp::lsp_types::CompletionItemKind::VARIABLE,
+                    _ => tower_lsp::lsp_types::CompletionItemKind::TEXT,
+                };
+                completions.push(CompletionItem {
+                    label: symbol.name,
+                    kind: Some(kind),
+                    ..Default::default()
+                });
+            };
         }
         Ok(
             Some(CompletionResponse::Array(
-                completions.into_iter().map(|s| 
-                CompletionItem {
-                    label: s,
-                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::KEYWORD),
-                    ..Default::default()
-                }
-                ).collect()
+                completions
             ))
         )
     }
-    
 }
