@@ -10,5 +10,11 @@
 - `server/`: Contains the server code
 - `syntax/`: Contains TextMate syntax definitions for coloring at grammar level
 
+
+# Features
+- Syntax highlighting using TextMate grammar
+- Completion
+- Go to definition
+- Definition Hover
 # Usage
 Run vscode launch task `Debug Client + Server`
