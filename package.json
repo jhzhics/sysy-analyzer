@@ -1,6 +1,10 @@
 {
   "name": "sysy-analyzer",
   "description": "Analyzer for SysY language",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhzhics/sysy-analyzer"
+  },
   "author": "jhzhics",
   "license": "MIT",
   "version": "1.0.0",
@@ -16,8 +20,13 @@
     "languages": [
       {
         "id": "sysy",
-        "aliases": ["SySy", "sysy"],
-        "extensions": [".sy"],
+        "aliases": [
+          "SySy",
+          "sysy"
+        ],
+        "extensions": [
+          ".sy"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -38,6 +47,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
-    "typescript": "^5.2.2"
+    "@vscode/vsce": "^2.32.0",
+    "typescript": "^5.2.2",
+    "vsce": "^2.15.0"
   }
 }

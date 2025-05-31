@@ -16,5 +16,18 @@
 - Completion
 - Go to definition
 - Definition Hover
+
 # Usage
 Run vscode launch task `Debug Client + Server`
+
+# Publish
+## Package
+```bash
+npm install -g vsce
+vsce package
+```
+## Package
+```bash
+vsce login <publisher-name>
+vsce publish <version>
+```

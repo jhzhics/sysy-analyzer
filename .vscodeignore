@@ -1,0 +1,3 @@
+.vscode/
+server/target/
+!server/target/release/sysy-analyzer-server
